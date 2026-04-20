@@ -1,18 +1,18 @@
 /* Color Palette & Variables */
 :root {
-    --color-ivory: #FDFBF7;
-    --color-champagne: #F2E8C6;
-    --color-dusty-rose: #DCAE96;
-    --color-gold: #D4AF37;
-    --color-gold-hover: #c49a2a;
-    --color-dark: #2C2A29;
-    --color-text: #4A4A4A;
+    --color-ivory: #faf7f0;
+    --color-champagne: #E8DDCA;
+    --color-dusty-rose: #C69C82;
+    --color-gold: #cfaa60;
+    --color-gold-hover: #b89146;
+    --color-dark: #1a1918;
+    --color-text: #3d3d3d;
     --color-white: #FFFFFF;
 
     --font-heading: 'Cormorant Garamond', serif;
     --font-body: 'Outfit', sans-serif;
 
-    --transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 /* Reset & Base */
@@ -71,12 +71,13 @@ ul {
 
 /* Typography Enhancements */
 .hero-title {
-    font-size: clamp(3.5rem, 8vw, 6rem);
-    line-height: 1.1;
+    font-size: clamp(4rem, 9vw, 7.5rem);
+    line-height: 1.05;
     margin-bottom: 1.5rem;
     color: var(--color-white);
-    letter-spacing: 0.05em;
-    text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    letter-spacing: -0.02em;
+    text-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    font-weight: 500;
 }
 
 .hero-subtext {
@@ -205,10 +206,12 @@ header {
 }
 
 header.scrolled {
-    background: rgba(253, 251, 247, 0.95);
-    backdrop-filter: blur(10px);
+    background: rgba(250, 247, 240, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     padding: 1rem 0;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 40px rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.4);
 }
 
 header.scrolled .logo,
@@ -319,8 +322,20 @@ header.scrolled .mobile-menu-btn span {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(44, 42, 41, 0.4);
+    background: linear-gradient(135deg, rgba(26,25,24,0.7) 0%, rgba(26,25,24,0.3) 100%);
     z-index: -1;
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40%;
+    background: linear-gradient(to top, var(--color-ivory), transparent);
+    z-index: -1;
+    pointer-events: none;
 }
 
 .hero-content {
@@ -661,22 +676,42 @@ section {
 }
 
 .gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 1.5rem;
+    column-count: 3;
+    column-gap: 2rem;
+    padding-bottom: 2rem;
 }
+@media (max-width: 900px) { .gallery-grid { column-count: 2; } }
+@media (max-width: 600px) { .gallery-grid { column-count: 1; } }
 
 .gallery-item {
+    break-inside: avoid;
+    margin-bottom: 2rem;
+    border-radius: 12px;
     overflow: hidden;
-    border-radius: 8px;
-    cursor: pointer;
+    cursor: none; /* custom cursor */
     position: relative;
-    aspect-ratio: 4/3;
-    transition: transform 0.4s ease, opacity 0.4s ease;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease, box-shadow 0.6s;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.gallery-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.12);
 }
 
 .gallery-item.hide {
     display: none;
+}
+
+.gallery-item .gallery-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.gallery-item:hover .gallery-img {
+    transform: scale(1.08); /* Zoom effect */
 }
 
 .gallery-item .placeholder-box {
@@ -1174,6 +1209,27 @@ section {
     border: none;
 }
 
+.star-rating-input {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 2rem;
+    color: #e1e1e1; /* default unfilled color */
+    cursor: pointer;
+    margin-top: 0.5rem;
+}
+
+.star-rating-input .star {
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.star-rating-input .star.active {
+    color: var(--color-gold);
+}
+
+.star-rating-input .star:hover {
+    transform: scale(1.1);
+}
+
 /* FAQ Accordion */
 .faq-section {
     background-color: var(--color-champagne);
@@ -1355,6 +1411,7 @@ section {
 .floating-whatsapp:hover {
     transform: scale(1.1);
     box-shadow: 0 15px 25px rgba(37, 211, 102, 0.4);
+    background-color: #25D366; /* WhatsApp Green */
     color: white;
 }
 
@@ -1403,11 +1460,35 @@ section {
 
 /* Responsive */
 @media (max-width: 992px) {
-    .nav-links, .nav-actions .btn {
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: var(--color-dark);
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+    .nav-links.active {
+        display: flex;
+    }
+    .nav-actions .btn {
         display: none;
     }
     .mobile-menu-btn {
         display: flex;
+    }
+    .mobile-menu-btn.active span:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+    }
+    .mobile-menu-btn.active span:nth-child(2) {
+        opacity: 0;
+    }
+    .mobile-menu-btn.active span:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
     }
     .hero-title {
         font-size: clamp(2.5rem, 6vw, 4rem);
@@ -1421,5 +1502,47 @@ section {
     }
     .about-visuals {
         min-height: 400px;
+    }
+}
+
+/* Custom Cursor */
+@media (min-width: 1024px) {
+    body, a, button, input, select, textarea, .gallery-item {
+        cursor: none;
+    }
+    
+    .custom-cursor {
+        width: 6px;
+        height: 6px;
+        background: var(--color-gold);
+        border-radius: 50%;
+        position: fixed;
+        pointer-events: none;
+        z-index: 10000;
+        transform: translate(-50%, -50%);
+        transition: width 0.3s, height 0.3s, background 0.3s;
+    }
+
+    .custom-cursor-follower {
+        width: 40px;
+        height: 40px;
+        border: 1px solid rgba(207, 170, 96, 0.5);
+        border-radius: 50%;
+        position: fixed;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition: transform 0.08s linear, width 0.3s, height 0.3s, background 0.3s, border-color 0.3s;
+    }
+
+    .cursor-hover .custom-cursor {
+        background: transparent;
+    }
+    .cursor-hover .custom-cursor-follower {
+        width: 70px;
+        height: 70px;
+        background: rgba(207, 170, 96, 0.1);
+        border-color: transparent;
+        backdrop-filter: blur(2px);
     }
 }

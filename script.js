@@ -1,4 +1,22 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // 0. Mobile Menu Logic
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navLinksContainer = document.querySelector('.nav-links');
+    if (mobileMenuBtn && navLinksContainer) {
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenuBtn.classList.toggle('active');
+            navLinksContainer.classList.toggle('active');
+        });
+        
+        // Close menu on link click
+        navLinksContainer.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenuBtn.classList.remove('active');
+                navLinksContainer.classList.remove('active');
+            });
+        });
+    }
+
     // 1. Loading Screen
     const loader = document.getElementById('loader');
     setTimeout(() => {
@@ -69,11 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 5. Mobile Menu Toggle Placeholder
-    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-    mobileMenuBtn.addEventListener('click', () => {
-        alert('Mobile menu feature to be implemented in next phase.');
-    });
 
     // 6. Gallery Filter Logic
     const filterBtns = document.querySelectorAll('.filter-btn');
@@ -118,10 +131,26 @@ document.addEventListener('DOMContentLoaded', () => {
         item.addEventListener('click', () => {
             // Copy contents into lightbox
             const internalDiv = item.querySelector('.placeholder-box');
-            if (lightboxImg && internalDiv) {
-                lightboxImg.innerHTML = internalDiv.innerHTML;
-                lightboxImg.style.backgroundColor = getComputedStyle(internalDiv).backgroundColor;
-                lightboxImg.style.color = getComputedStyle(internalDiv).color;
+            const internalImg = item.querySelector('img.gallery-img');
+            
+            if (lightboxImg) {
+                // Clear any previous content
+                lightboxImg.innerHTML = '';
+                lightboxImg.style.backgroundColor = 'transparent';
+                
+                if (internalDiv) {
+                    lightboxImg.innerHTML = internalDiv.innerHTML;
+                    lightboxImg.style.backgroundColor = getComputedStyle(internalDiv).backgroundColor;
+                    lightboxImg.style.color = getComputedStyle(internalDiv).color;
+                } else if (internalImg) {
+                    const imgClone = document.createElement('img');
+                    imgClone.src = internalImg.src;
+                    imgClone.style.width = '100%';
+                    imgClone.style.height = '100%';
+                    imgClone.style.objectFit = 'contain';
+                    imgClone.style.borderRadius = '8px';
+                    lightboxImg.appendChild(imgClone);
+                }
             }
             lightbox.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -194,13 +223,147 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 11. Form submit placeholder
+    // 11. WhatsApp Booking Submission
     const bookingForm = document.getElementById('booking-form');
     if (bookingForm) {
         bookingForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            alert('Thank you for your inquiry! We will contact you soon.');
+            
+            // Collect form data
+            const name = document.getElementById('booking-name').value;
+            const phone = document.getElementById('booking-phone').value;
+            const email = document.getElementById('booking-email').value;
+            const type = document.getElementById('booking-type').value;
+            const date = document.getElementById('booking-date').value;
+            const venue = document.getElementById('booking-venue').value;
+            const guests = document.getElementById('booking-guests').value || 'Not specified';
+            const requests = document.getElementById('booking-requests').value || 'None';
+
+            // Construct WhatsApp Message
+            let message = `*New Booking Inquiry - Shubhamasthu Events*\n\n`;
+            message += `*Name:* ${name}\n`;
+            message += `*Phone:* ${phone}\n`;
+            message += `*Email:* ${email}\n`;
+            message += `*Event Type:* ${type}\n`;
+            message += `*Event Date:* ${date}\n`;
+            message += `*Venue:* ${venue}\n`;
+            message += `*Guests:* ${guests}\n`;
+            message += `*Vision/Requests:* ${requests}\n`;
+
+            // WhatsApp Number
+            const whatsappNumber = "917483773137"; 
+            
+            // Encode and Redirect to WhatsApp
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+            
+            // Open WhatsApp in new tab
+            window.open(whatsappUrl, '_blank');
+            
+            // Reset form and notify user
+            alert('Perfect! Redirecting you to WhatsApp to complete your inquiry.');
             bookingForm.reset();
+        });
+    }
+
+    // 11b. Star Rating Logic
+    const stars = document.querySelectorAll('.star-rating-input .star');
+    const ratingInput = document.getElementById('review-rating');
+
+    if (stars.length > 0 && ratingInput) {
+        // Init default 5 stars
+        stars.forEach(star => star.classList.add('active'));
+
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                const value = parseInt(star.getAttribute('data-value'));
+                ratingInput.value = value;
+                
+                // Update active state
+                stars.forEach(s => {
+                    const sValue = parseInt(s.getAttribute('data-value'));
+                    if (sValue <= value) {
+                        s.classList.add('active');
+                    } else {
+                        s.classList.remove('active');
+                    }
+                });
+            });
+        });
+    }
+
+    // 11c. Review Form Submission
+    const reviewForm = document.getElementById('review-form');
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // Collect form data
+            const name = document.getElementById('review-name').value;
+            const eventType = document.getElementById('review-event').value;
+            const rating = document.getElementById('review-rating').value;
+            const feedback = document.getElementById('review-text').value;
+
+            // Construct WhatsApp Message
+            let message = `*New Customer Review - Shubhamasthu Events*\n\n`;
+            message += `*Name:* ${name}\n`;
+            message += `*Event:* ${eventType}\n`;
+            message += `*Rating:* ${rating}/5 Stars\n`;
+            message += `*Feedback:* ${feedback}\n`;
+
+            // WhatsApp Number
+            const whatsappNumber = "917483773137"; 
+            
+            // Encode and Redirect to WhatsApp
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+            
+            // Open WhatsApp in new tab
+            window.open(whatsappUrl, '_blank');
+            
+            // Reset form and notify user
+            alert('Thank you for your feedback! Redirecting you to WhatsApp to submit it.');
+            reviewForm.reset();
+            
+            // Reset stars to default (5)
+            if(stars.length > 0) stars.forEach(s => s.classList.add('active'));
+            if(ratingInput) ratingInput.value = 5;
+        });
+    }
+
+    // 12. Custom Cursor Logic
+    const cursor = document.querySelector('.custom-cursor');
+    const follower = document.querySelector('.custom-cursor-follower');
+    
+    if (cursor && follower) {
+        let posX = 0, posY = 0;
+        let mouseX = 0, mouseY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            cursor.style.left = mouseX + 'px';
+            cursor.style.top = mouseY + 'px';
+        });
+
+        // Smooth follow
+        function render() {
+            posX += (mouseX - posX) * 0.15;
+            posY += (mouseY - posY) * 0.15;
+            
+            follower.style.left = posX + 'px';
+            follower.style.top = posY + 'px';
+            
+            requestAnimationFrame(render);
+        }
+        render();
+
+        // Hover states
+        const interactiveElements = document.querySelectorAll('a, button, input, textarea, select, .gallery-item, .service-card');
+        interactiveElements.forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
         });
     }
 });
