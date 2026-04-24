@@ -1,4 +1,68 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // 0a. Urgency Banner Logic
+    const banner = document.getElementById('urgency-banner');
+    const closeBannerBtn = document.getElementById('close-banner');
+    if (banner && closeBannerBtn) {
+        // Check if previously dismissed
+        if (!sessionStorage.getItem('urgencyBannerDismissed')) {
+            banner.classList.add('show');
+            // Adjust header top to match banner height
+            const header = document.getElementById('header');
+            if(header) {
+                const bannerHeight = banner.offsetHeight;
+                header.style.top = bannerHeight + 'px';
+            }
+        }
+
+        closeBannerBtn.addEventListener('click', () => {
+            banner.classList.remove('show');
+            sessionStorage.setItem('urgencyBannerDismissed', 'true');
+            // Reset header top
+            const header = document.getElementById('header');
+            if(header) header.style.top = '0';
+        });
+    }
+
+    // 0b. Stats Counter Logic
+    const statsSection = document.getElementById('stats');
+    const statNumbers = document.querySelectorAll('.stat-number');
+    let hasCounted = false;
+
+    if (statsSection && statNumbers.length > 0) {
+        const countUp = () => {
+            statNumbers.forEach(stat => {
+                const target = +stat.getAttribute('data-target');
+                const duration = 2000; // ms
+                const increment = target / (duration / 16); // 60fps
+                
+                let current = 0;
+                const updateCounter = () => {
+                    current += increment;
+                    if (current < target) {
+                        stat.innerText = Math.ceil(current);
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        stat.innerText = target;
+                    }
+                };
+                updateCounter();
+            });
+        };
+
+        const checkStatsScroll = () => {
+            if (hasCounted) return;
+            const windowHeight = window.innerHeight;
+            const elementTop = statsSection.getBoundingClientRect().top;
+            if (elementTop < windowHeight - 100) {
+                hasCounted = true;
+                countUp();
+            }
+        };
+
+        window.addEventListener('scroll', checkStatsScroll);
+        checkStatsScroll(); // Check on load
+    }
+
     // 0. Mobile Menu Logic
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
     const navLinksContainer = document.querySelector('.nav-links');
@@ -129,28 +193,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     galleryItems.forEach(item => {
         item.addEventListener('click', () => {
-            // Copy contents into lightbox
-            const internalDiv = item.querySelector('.placeholder-box');
             const internalImg = item.querySelector('img.gallery-img');
             
-            if (lightboxImg) {
-                // Clear any previous content
-                lightboxImg.innerHTML = '';
-                lightboxImg.style.backgroundColor = 'transparent';
-                
-                if (internalDiv) {
-                    lightboxImg.innerHTML = internalDiv.innerHTML;
-                    lightboxImg.style.backgroundColor = getComputedStyle(internalDiv).backgroundColor;
-                    lightboxImg.style.color = getComputedStyle(internalDiv).color;
-                } else if (internalImg) {
-                    const imgClone = document.createElement('img');
-                    imgClone.src = internalImg.src;
-                    imgClone.style.width = '100%';
-                    imgClone.style.height = '100%';
-                    imgClone.style.objectFit = 'contain';
-                    imgClone.style.borderRadius = '8px';
-                    lightboxImg.appendChild(imgClone);
-                }
+            if (lightboxImg && internalImg) {
+                lightboxImg.src = internalImg.src;
             }
             lightbox.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -229,6 +275,12 @@ document.addEventListener('DOMContentLoaded', () => {
         bookingForm.addEventListener('submit', (e) => {
             e.preventDefault();
             
+            // Check validation
+            if (!bookingForm.checkValidity()) {
+                bookingForm.reportValidity();
+                return;
+            }
+
             // Collect form data
             const name = document.getElementById('booking-name').value;
             const phone = document.getElementById('booking-phone').value;
@@ -261,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.open(whatsappUrl, '_blank');
             
             // Reset form and notify user
-            alert('Perfect! Redirecting you to WhatsApp to complete your inquiry.');
+            showToast('Success! Redirecting to WhatsApp...');
             bookingForm.reset();
         });
     }
@@ -298,6 +350,12 @@ document.addEventListener('DOMContentLoaded', () => {
         reviewForm.addEventListener('submit', (e) => {
             e.preventDefault();
 
+            // Check validation
+            if (!reviewForm.checkValidity()) {
+                reviewForm.reportValidity();
+                return;
+            }
+
             // Collect form data
             const name = document.getElementById('review-name').value;
             const eventType = document.getElementById('review-event').value;
@@ -322,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.open(whatsappUrl, '_blank');
             
             // Reset form and notify user
-            alert('Thank you for your feedback! Redirecting you to WhatsApp to submit it.');
+            showToast('Thank you! Redirecting to WhatsApp...');
             reviewForm.reset();
             
             // Reset stars to default (5)
@@ -365,5 +423,43 @@ document.addEventListener('DOMContentLoaded', () => {
             el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
             el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
         });
+    }
+
+    // 13. Dynamic Copyright Year
+    const yearSpan = document.getElementById('copyright-year');
+    if (yearSpan) {
+        const currentYear = new Date().getFullYear();
+        if (currentYear > 2025) {
+            yearSpan.textContent = `2025–${currentYear}`;
+        }
+    }
+
+    // 14. Service Link Pre-fill Logic
+    const serviceLinks = document.querySelectorAll('.service-link');
+    const bookingTypeSelect = document.getElementById('booking-type');
+    
+    serviceLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            const eventType = link.getAttribute('data-event');
+            if (eventType && bookingTypeSelect) {
+                bookingTypeSelect.value = eventType;
+            }
+        });
+    });
+
+    // 15. Toast Notification Logic
+    function showToast(message) {
+        let toast = document.getElementById('toast-notification');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'toast-notification';
+            toast.className = 'toast';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 4000);
     }
 });
